@@ -61,20 +61,14 @@ DIAAPPS = \
 	webtool \
 
 STD_PLT = $(HOME)/.dialyzer_plt
-USE_PLT = erl_deps.plt
+USE_PLT = erl_std.plt
 
 build_plt: all $(USE_PLT)
 erl_std.plt:
 	cp ~/.erl_std.plt . || \
 		$(DIALYZER) --build_plt  --apps $(DIAAPPS) --output_plt erl_std.plt
 
-.SECONDARY: erl_deps.plt
-erl_deps.plt: erl_std.plt 
-	$(DIALYZER) --plt erl_std.plt --add_to_plt --apps $(DIAAPPS) --output_plt erl_std.plt
-	$(DIALYZER) -I deps --plt erl_std.plt --add_to_plt deps/*/ebin --output_plt erl_deps.plt
-
 dialyzer: all $(USE_PLT)
-	$(DIALYZER) ebin -I deps --plts $(USE_PLT) | \
-		grep -vf .dialyzer-ignore-warnings
+	$(DIALYZER) ebin --plts $(USE_PLT)
 
 

@@ -22,10 +22,14 @@
 ]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
+-export_type([resource/0, withlock_fun/1]).
+-type resource() :: term().
+
+
 start_link() -> gen_server:start_link({local, locker}, ?MODULE, [], []).
 
 %% Unconditionally lock the resource
-%% @spec lock(term()) -> ok
+-spec lock(resource()) -> ok.
 lock(Term) -> 
     case lock(Term, infinity) of
 		ok -> ok;
@@ -33,9 +37,7 @@ lock(Term) ->
     end.
 
 %% Lock the resource with a specified timeout.
-%% @spec lock(term(), Timeout) -> ok | fail
-%% Types
-%% 	Timeout = int() | infinity
+-spec lock(resource(), timeout()) -> ok | fail.
 lock(Term, Timeout) ->
     case gen_server:call(locker, {lock, Term}) of
         ok -> ok;
@@ -54,23 +56,25 @@ dump(term, Term) -> gen_server:call(locker, {dump, term, Term});
 dump(pid, Pid) -> gen_server:call(locker, {dump, pid, Pid}).
 
 %% Try locking the resource
-%% @spec trylock(term()) -> ok | fail
+-spec trylock(resource()) -> ok | fail.
 trylock(Term) -> gen_server:call(locker, {trylock, Term}).
 
 %% Unlock the resource
-%% @spec unlock(term()) -> ok | fail
+-spec unlock(resource()) -> ok | fail.
 unlock(Term) -> gen_server:call(locker, {unlock, Term, normal}).
 
 %% Check if we have this resource locked
-%% @spec islocked(term()) -> true | false
+-spec islocked(resource()) -> true | false.
 islocked(Term) -> gen_server:call(locker, {isLockedByMe, Term}).
 
 %% Move the held lock to another process.
-%% @spec move(term(), pid()) -> ok | fail
+-spec lend(resource(), pid()) -> ok | fail.
 lend(Term, Pid) -> gen_server:call(locker, {lend_lock, Term, Pid}).
 
 %% Execute the function while holding a lock.
-withlock(Term, Fun) ->
+-type withlock_fun(Out) :: fun (() -> Out).
+-spec withlock(resource(), withlock_fun(Out)) -> Out.
+withlock(Term, Fun) when is_function(Fun, 0) ->
 	lock(Term),
 	try Fun() of
 	    Value -> unlock(Term), Value
