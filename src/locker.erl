@@ -105,7 +105,7 @@ handle_call(Query, {FromPid,_},
     {reply, lockerOperation(Query, FromPid, {TermsT, PidsT}), State};
 handle_call(_Query, _From, State) -> {noreply, State}.
 
-handle_cast(_Query, State) -> {noreply, State}.
+handle_cast(_Msg, State) -> {noreply, State}.
 
 handle_info({'EXIT', Pid, _Info}, #state{term2pids = TermsT, pid2terms = PidsT} = State) ->
     lockerOperation(unlockByPid, Pid, {TermsT, PidsT}),
