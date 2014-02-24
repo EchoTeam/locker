@@ -1,7 +1,3 @@
-%%% 
-%%% Copyright (c) 2007, 2009 JackNyfe. All rights reserved.
-%%% THIS SOFTWARE IS PROPRIETARY AND CONFIDENTIAL. DO NOT REDISTRIBUTE.
-%%% 
 -module(locker).
 -behavior(gen_server).
 -export([
